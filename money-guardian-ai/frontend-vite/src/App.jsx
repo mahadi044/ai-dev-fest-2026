@@ -3,6 +3,7 @@ import "./App.css";
 import Transactions from "./pages/Transactions";
 import RiskGuardian from "./pages/RiskGuardian";
 import MoneyInsights from "./pages/MoneyInsights";
+import WhatIfSimulator from "./pages/WhatIfSimulator";
 
 function Dashboard() {
 return ( <div className="app"> <aside className="sidebar"> <div className="brand"> <div className="brand-mark">M</div> <div> <h2>Money Guardian</h2> <span>Financial Intelligence</span> </div> </div>
@@ -32,10 +33,10 @@ return ( <div className="app"> <aside className="sidebar"> <div className="brand
         Money Insights
       </Link>
 
-      <button className="nav-item">
-        <span>◇</span>
+      <Link to="/what-if-simulator" className="nav-item">
+        <span>?</span>
         What-If Simulator
-      </button>
+      </Link>
 
       <button className="nav-item">
         <span>✦</span>
@@ -341,11 +342,13 @@ return ( <BrowserRouter> <Routes>
 <Route path="/" element={<Dashboard />} />
 <Route path="/transactions" element={<Transactions />} />
 <Route path="/risk-guardian" element={<RiskGuardian />} />
-        <Route path="/money-insights" element={<MoneyInsights />} /> </Routes> </BrowserRouter>
+        <Route path="/money-insights" element={<MoneyInsights />} />
+<Route path="/what-if-simulator" element={<WhatIfSimulator />} /> </Routes> </BrowserRouter>
 );
 }
 
 export default App;
+
 
 
 

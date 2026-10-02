@@ -2581,3 +2581,244 @@ button {
     margin-left: 58px;
   }
 }
+
+/* =========================
+   WHAT-IF SIMULATOR
+   ========================= */
+
+.what-if-page {
+  padding: 32px;
+  color: #f5f7fb;
+}
+
+.what-if-page .page-header {
+  margin-bottom: 28px;
+}
+
+.what-if-page .page-header h1 {
+  margin: 10px 0 8px;
+  font-size: 34px;
+  font-weight: 700;
+}
+
+.what-if-page .page-header p {
+  margin: 0;
+  color: #9aa4b2;
+  font-size: 15px;
+  max-width: 700px;
+}
+
+.what-if-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 22px;
+  margin-bottom: 22px;
+}
+
+.simulator-panel,
+.projection-panel,
+.ai-recommendation-panel {
+  background: #151a28;
+  border: 1px solid #252c3d;
+  border-radius: 18px;
+  padding: 26px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+}
+
+.what-if-page .panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.what-if-page .panel-header h2 {
+  margin: 0 0 6px;
+  font-size: 20px;
+}
+
+.what-if-page .panel-header p {
+  margin: 0;
+  color: #8993a4;
+  font-size: 13px;
+}
+
+.simulator-form {
+  display: grid;
+  gap: 20px;
+}
+
+.simulator-form label {
+  display: block;
+  color: #dce2eb;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.input-with-symbol {
+  display: flex;
+  align-items: center;
+  margin-top: 9px;
+  background: #0f1420;
+  border: 1px solid #2b3448;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.input-with-symbol span {
+  padding: 0 14px;
+  color: #8e99aa;
+  font-size: 14px;
+}
+
+.input-with-symbol input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #ffffff;
+  padding: 14px 12px;
+  font-size: 16px;
+}
+
+.input-with-symbol:focus-within {
+  border-color: #2ee7f2;
+  box-shadow: 0 0 0 3px rgba(46, 231, 242, 0.08);
+}
+
+.scenario-preview {
+  margin-top: 24px;
+  padding: 18px;
+  border-radius: 14px;
+  background: #1b2232;
+  border: 1px solid #293348;
+}
+
+.scenario-preview span {
+  display: block;
+  color: #8993a4;
+  font-size: 12px;
+  margin-bottom: 7px;
+}
+
+.scenario-preview strong {
+  display: block;
+  font-size: 17px;
+  color: #ffffff;
+}
+
+.scenario-preview p {
+  margin: 5px 0 0;
+  color: #8f9aaa;
+  font-size: 13px;
+}
+
+.projection-value {
+  padding: 22px;
+  border-radius: 16px;
+  background: linear-gradient(
+    135deg,
+    rgba(46, 231, 242, 0.10),
+    rgba(78, 234, 131, 0.07)
+  );
+  border: 1px solid rgba(46, 231, 242, 0.18);
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.projection-value span {
+  display: block;
+  color: #9aa4b2;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.projection-value strong {
+  display: block;
+  font-size: 38px;
+  color: #4eea83;
+}
+
+.projection-stats {
+  display: grid;
+  gap: 12px;
+}
+
+.projection-stats > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background: #101520;
+  border: 1px solid #252d3e;
+  border-radius: 11px;
+}
+
+.projection-stats span {
+  color: #929cac;
+  font-size: 13px;
+}
+
+.projection-stats strong {
+  color: #f4f7fb;
+  font-size: 14px;
+}
+
+.ai-recommendation-panel {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+}
+
+.ai-recommendation-icon {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: rgba(255, 216, 77, 0.10);
+  color: #ffd84d;
+  font-size: 22px;
+}
+
+.ai-recommendation-panel h2 {
+  margin: 10px 0 8px;
+  font-size: 19px;
+}
+
+.ai-recommendation-panel p {
+  margin: 0;
+  color: #9aa4b2;
+  line-height: 1.7;
+  font-size: 14px;
+  max-width: 850px;
+}
+
+@media (max-width: 900px) {
+  .what-if-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .what-if-page {
+    padding: 22px;
+  }
+}
+
+@media (max-width: 600px) {
+  .what-if-page {
+    padding: 16px;
+  }
+
+  .what-if-page .page-header h1 {
+    font-size: 28px;
+  }
+
+  .projection-value strong {
+    font-size: 32px;
+  }
+
+  .ai-recommendation-panel {
+    flex-direction: column;
+  }
+}
