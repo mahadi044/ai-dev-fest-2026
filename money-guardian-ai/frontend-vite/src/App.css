@@ -2203,3 +2203,381 @@ button {
     grid-template-columns: 1fr 1fr;
   }
 }
+
+/* =========================
+   MONEY INSIGHTS
+========================= */
+
+.money-insights-page {
+  padding: 32px;
+}
+
+.money-insights-page .page-header {
+  margin-bottom: 24px;
+}
+
+.money-insights-page .page-header h1 {
+  margin: 10px 0 6px;
+  font-size: 32px;
+}
+
+.money-insights-page .page-header p {
+  color: #8f98ad;
+}
+
+.insights-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.insight-summary-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 22px;
+  background: #171c2b;
+  border: 1px solid #252c40;
+  border-radius: 16px;
+}
+
+.summary-icon {
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: #20283a;
+  font-size: 22px;
+}
+
+.insight-summary-card p {
+  margin: 0 0 5px;
+  color: #8f98ad;
+  font-size: 13px;
+}
+
+.insight-summary-card h2 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.insight-summary-card h2 span {
+  color: #8f98ad;
+  font-size: 15px;
+}
+
+.insights-main-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(300px, 1fr);
+  gap: 24px;
+}
+
+.insights-main-grid .panel {
+  padding: 24px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.panel-header h2 {
+  margin: 0 0 6px;
+  font-size: 20px;
+}
+
+.panel-header p {
+  margin: 0;
+  color: #8f98ad;
+  font-size: 13px;
+}
+
+.ai-status {
+  color: #4eea83;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.insight-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.money-insight-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 18px;
+  background: #111625;
+  border: 1px solid #252c40;
+  border-radius: 14px;
+}
+
+.insight-icon {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 11px;
+  background: #20283a;
+  font-size: 20px;
+}
+
+.insight-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.insight-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.insight-title-row h3 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.insight-content > p {
+  margin: 8px 0 10px;
+  color: #929bad;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.insight-tag {
+  display: inline-flex;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: #20283a;
+  color: #9ca7bd;
+  font-size: 10px;
+}
+
+.insight-details-button {
+  border: 0;
+  background: transparent;
+  color: #2ee7f2;
+  padding: 0;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.insight-details-button:hover {
+  text-decoration: underline;
+}
+
+.insight-value {
+  font-size: 16px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.money-score-panel {
+  text-align: center;
+}
+
+.money-health-ring {
+  width: 150px;
+  height: 150px;
+  margin: 28px auto 20px;
+  border-radius: 50%;
+  background: conic-gradient(#4eea83 0deg 295deg, #252c40 295deg 360deg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.money-health-ring::before {
+  content: "";
+  position: absolute;
+}
+
+.money-health-ring > div {
+  width: 116px;
+  height: 116px;
+  border-radius: 50%;
+  background: #171c2b;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  padding-top: 40px;
+}
+
+.money-health-ring strong {
+  font-size: 34px;
+}
+
+.money-health-ring span {
+  color: #8f98ad;
+  font-size: 14px;
+}
+
+.money-score-panel > h3 {
+  margin: 0 0 8px;
+}
+
+.health-description {
+  color: #8f98ad;
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 0 auto 24px;
+  max-width: 360px;
+}
+
+.health-bars {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.health-bar-item > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 7px;
+  font-size: 12px;
+}
+
+.health-bar-item span {
+  color: #8f98ad;
+}
+
+.health-bar {
+  height: 7px;
+  background: #252c40;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.health-bar span {
+  display: block;
+  height: 100%;
+  background: #4eea83;
+  border-radius: inherit;
+}
+
+/* Insight Modal */
+
+.insight-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(5, 8, 15, 0.78);
+}
+
+.insight-modal {
+  width: min(560px, 100%);
+  background: #171c2b;
+  border: 1px solid #30384e;
+  border-radius: 18px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+.insight-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 24px;
+  border-bottom: 1px solid #252c40;
+}
+
+.insight-modal-header > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.insight-modal-header h2 {
+  margin: 0;
+  font-size: 19px;
+}
+
+.insight-modal-icon {
+  font-size: 22px;
+}
+
+.modal-close {
+  border: 0;
+  background: transparent;
+  color: #9ca7bd;
+  font-size: 25px;
+  cursor: pointer;
+}
+
+.insight-modal-body {
+  padding: 24px;
+}
+
+.insight-modal-body > p {
+  color: #a5aec0;
+  line-height: 1.7;
+  font-size: 14px;
+  margin: 16px 0;
+}
+
+.insight-recommendation {
+  padding: 16px;
+  border: 1px solid #28334a;
+  background: #111625;
+  border-radius: 12px;
+}
+
+.insight-recommendation h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+
+.insight-recommendation p {
+  margin: 0;
+  color: #929bad;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.insight-modal-footer {
+  padding: 18px 24px;
+  border-top: 1px solid #252c40;
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 900px) {
+  .insights-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .insights-main-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .money-insights-page {
+    padding: 20px;
+  }
+
+  .money-insight-card {
+    flex-wrap: wrap;
+  }
+
+  .insight-value {
+    margin-left: 58px;
+  }
+}

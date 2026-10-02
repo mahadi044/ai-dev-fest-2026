@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import "./App.css";
 import Transactions from "./pages/Transactions";
 import RiskGuardian from "./pages/RiskGuardian";
+import MoneyInsights from "./pages/MoneyInsights";
 
 function Dashboard() {
 return ( <div className="app"> <aside className="sidebar"> <div className="brand"> <div className="brand-mark">M</div> <div> <h2>Money Guardian</h2> <span>Financial Intelligence</span> </div> </div>
@@ -26,10 +27,10 @@ return ( <div className="app"> <aside className="sidebar"> <div className="brand
         Risk Guardian
       </Link>
 
-      <button className="nav-item">
-        <span>◔</span>
+      <Link to="/money-insights" className="nav-item">
+        <span>?</span>
         Money Insights
-      </button>
+      </Link>
 
       <button className="nav-item">
         <span>◇</span>
@@ -339,8 +340,13 @@ function App() {
 return ( <BrowserRouter> <Routes>
 <Route path="/" element={<Dashboard />} />
 <Route path="/transactions" element={<Transactions />} />
-<Route path="/risk-guardian" element={<RiskGuardian />} /> </Routes> </BrowserRouter>
+<Route path="/risk-guardian" element={<RiskGuardian />} />
+        <Route path="/money-insights" element={<MoneyInsights />} /> </Routes> </BrowserRouter>
 );
 }
 
 export default App;
+
+
+
+
