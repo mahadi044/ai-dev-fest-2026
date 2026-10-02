@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import "./App.css";
 import Transactions from "./pages/Transactions";
+import RiskGuardian from "./pages/RiskGuardian";
 
 function Dashboard() {
   return (
@@ -348,9 +349,11 @@ function App() {
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/transactions" element={<Transactions />} />
+        <Route path="/risk-guardian" element={<RiskGuardian />} />
       </Routes>
     </BrowserRouter>
   );
 }
 
 export default App;
+
