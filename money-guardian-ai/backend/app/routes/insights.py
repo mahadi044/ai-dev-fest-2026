@@ -1,17 +1,27 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.core.dependencies import get_current_user
 from app.database.connection import get_db
 from app.models.transaction import Transaction
+from app.models.user import User
 from app.services.spending_service import calculate_spending_summary
 
-router = APIRouter(prefix="/api/insights", tags=["Money Insights"])
+
+router = APIRouter(
+    prefix="/api/insights",
+    tags=["Money Insights"],
+)
 
 
 @router.get("/")
-def get_money_insights(db: Session = Depends(get_db)):
+def get_money_insights(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     transactions = (
         db.query(Transaction)
+        .filter(Transaction.user_id == current_user.id)
         .order_by(Transaction.transaction_date.desc())
         .all()
     )
