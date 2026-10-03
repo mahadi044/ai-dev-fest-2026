@@ -7902,3 +7902,915 @@ a {
   font-size: 12px;
   line-height: 1.7;
 }
+
+/* =========================================================
+   MONEY GUARDIAN AI
+   TYPOGRAPHY / READABILITY IMPROVEMENT
+   NOTE: Design, colors, spacing and layout remain unchanged.
+   ========================================================= */
+
+/* =========================
+   SIDEBAR
+   ========================= */
+
+.brand h2 {
+  font-size: 16px;
+}
+
+.brand > div:last-child > span {
+  font-size: 11px;
+}
+
+.nav-label {
+  font-size: 10px;
+}
+
+.nav-item {
+  font-size: 14px;
+}
+
+.profile-info strong {
+  font-size: 12px;
+}
+
+.profile-info span {
+  font-size: 10px;
+}
+
+/* =========================
+   TOPBAR
+   ========================= */
+
+.topbar-subtitle {
+  font-size: 13px;
+}
+
+.topbar-search input {
+  font-size: 12px;
+}
+
+.date-button {
+  font-size: 11px;
+}
+
+.profile-control-info strong {
+  font-size: 11px;
+}
+
+.profile-control-info span {
+  font-size: 9px;
+}
+
+/* =========================
+   DASHBOARD HERO
+   ========================= */
+
+.hero-eyebrow {
+  font-size: 10px;
+}
+
+.hero-content > p {
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.hero-metrics span {
+  font-size: 10px;
+}
+
+.hero-metrics strong {
+  font-size: 13px;
+}
+
+.hero-health {
+  font-size: 11px;
+}
+
+.hero-health-ring span {
+  font-size: 9px;
+}
+
+/* =========================
+   KPI CARDS
+   ========================= */
+
+.stat-label {
+  font-size: 11px;
+}
+
+.stat-meta {
+  font-size: 10px;
+}
+
+.stat-progress > span {
+  font-size: 9px;
+}
+
+/* =========================
+   COMMAND CENTER
+   ========================= */
+
+.section-eyebrow,
+.panel-eyebrow {
+  font-size: 9px;
+}
+
+.command-center-header h2 {
+  font-size: 18px;
+}
+
+.command-center-header p {
+  font-size: 11px;
+}
+
+.command-card-header > span {
+  font-size: 11px;
+}
+
+.command-card > p {
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.cash-flow-mini span {
+  font-size: 9px;
+}
+
+.cash-flow-mini b {
+  font-size: 10px;
+}
+
+.breakdown-row span,
+.breakdown-row strong {
+  font-size: 9px;
+}
+
+.empty-mini span {
+  font-size: 10px;
+}
+
+.empty-mini small {
+  font-size: 9px;
+}
+
+.signal-status {
+  font-size: 9px;
+}
+
+/* =========================
+   PANELS / CHARTS
+   ========================= */
+
+.panel-header h2 {
+  font-size: 16px;
+}
+
+.panel-header p {
+  font-size: 10px;
+}
+
+.panel-header-stat span {
+  font-size: 9px;
+}
+
+.panel-header-stat strong {
+  font-size: 13px;
+}
+
+.chart-labels {
+  font-size: 9px;
+}
+
+.chart-empty-state strong {
+  font-size: 12px;
+}
+
+.chart-empty-state span {
+  font-size: 10px;
+}
+
+/* =========================
+   DASHBOARD RISK
+   ========================= */
+
+.risk-status-badge {
+  font-size: 9px;
+}
+
+.risk-description strong {
+  font-size: 12px;
+}
+
+.risk-description p {
+  font-size: 10px;
+}
+
+.risk-footer > span {
+  font-size: 9px;
+}
+
+.risk-footer button {
+  font-size: 10px;
+}
+
+/* =========================
+   DASHBOARD TRANSACTIONS
+   ========================= */
+
+.transaction-details strong {
+  font-size: 11px;
+}
+
+.transaction-details span {
+  font-size: 9px;
+}
+
+.transaction-amount {
+  font-size: 11px;
+}
+
+.text-button {
+  font-size: 10px;
+}
+
+/* =========================
+   EMPTY STATES
+   ========================= */
+
+.empty-state strong {
+  font-size: 12px;
+}
+
+.empty-state span {
+  font-size: 10px;
+}
+
+/* =========================
+   AI INSIGHT DASHBOARD
+   ========================= */
+
+.ai-insight-message p {
+  font-size: 11px;
+  line-height: 1.75;
+}
+
+.ai-question input {
+  font-size: 10px;
+}
+
+.ai-question button {
+  font-size: 10px;
+}
+
+.open-ai-button {
+  font-size: 10px;
+}
+
+/* =========================
+   ALERTS / LOADING
+   ========================= */
+
+.dashboard-alert strong {
+  font-size: 11px;
+}
+
+.dashboard-alert span {
+  font-size: 10px;
+}
+
+.dashboard-alert button {
+  font-size: 10px;
+}
+
+.loading-indicator {
+  font-size: 10px;
+}
+
+/* =========================
+   PROFILE MODAL
+   ========================= */
+
+.profile-modal .modal-eyebrow {
+  font-size: 10px !important;
+}
+
+.profile-modal .modal-header p {
+  font-size: 12px !important;
+}
+
+.profile-modal .profile-form label {
+  font-size: 12px !important;
+}
+
+.profile-modal .profile-form input {
+  font-size: 13px !important;
+}
+
+.profile-modal .secondary-button,
+.profile-modal .primary-button {
+  font-size: 11px !important;
+}
+
+/* =========================
+   GENERIC MODAL
+   ========================= */
+
+.modal-eyebrow {
+  font-size: 9px;
+}
+
+.modal-header p {
+  font-size: 10px;
+}
+
+.profile-form label {
+  font-size: 10px;
+}
+
+.profile-form input {
+  font-size: 11px;
+}
+
+.secondary-button,
+.primary-button {
+  font-size: 10px;
+}
+
+/* =========================
+   TRANSACTIONS PAGE
+   ========================= */
+
+.transactions-page .page-header p {
+  font-size: 13px;
+}
+
+.transactions-page .primary-button {
+  font-size: 12px;
+}
+
+.transaction-summary-card span {
+  font-size: 11px;
+}
+
+.transaction-toolbar {
+  font-size: 12px;
+}
+
+.transactions-page .search-box input {
+  font-size: 12px;
+}
+
+.filter-area select {
+  font-size: 11px;
+}
+
+.transaction-table th {
+  font-size: 10px;
+}
+
+.transaction-table td {
+  font-size: 11px;
+}
+
+.transaction-name strong {
+  font-size: 12px;
+}
+
+.transaction-name span {
+  font-size: 9px;
+}
+
+.transaction-table .amount {
+  font-size: 12px;
+}
+
+.status-badge,
+.risk-badge {
+  font-size: 9px;
+}
+
+.transactions-page .delete-button {
+  font-size: 10px;
+}
+
+.transactions-page .modal-delete-button {
+  font-size: 11px;
+}
+
+.transactions-page .empty-state h3 {
+  font-size: 15px;
+}
+
+.transactions-page .empty-state p {
+  font-size: 11px;
+}
+
+/* =========================
+   RISK GUARDIAN PAGE
+   ========================= */
+
+.risk-guardian-page .page-header p {
+  font-size: 13px;
+}
+
+.risk-guardian-page .eyebrow {
+  font-size: 10px;
+}
+
+.protected-badge {
+  font-size: 10px;
+}
+
+.risk-guardian-page .card-label {
+  font-size: 10px;
+}
+
+.risk-guardian-page .guardian-status {
+  font-size: 10px;
+}
+
+.risk-guardian-page .guardian-score-card p {
+  font-size: 10px;
+}
+
+.risk-guardian-page .guardian-ring-inner span {
+  font-size: 9px;
+}
+
+.risk-guardian-page .risk-stat-card p {
+  font-size: 10px;
+}
+
+.risk-guardian-page .panel-header h3 {
+  font-size: 15px;
+}
+
+.risk-guardian-page .panel-header p {
+  font-size: 10px;
+}
+
+.risk-guardian-page .alert-count {
+  font-size: 9px;
+}
+
+.risk-guardian-page .risk-title-row h4 {
+  font-size: 13px;
+}
+
+.risk-guardian-page .risk-title-row span {
+  font-size: 9px;
+}
+
+.risk-guardian-page .risk-score-pill {
+  font-size: 9px;
+}
+
+.risk-guardian-page .high-risk-info > p {
+  font-size: 10px;
+}
+
+.risk-guardian-page .review-button {
+  font-size: 10px;
+}
+
+.risk-guardian-page .ai-heading h3 {
+  font-size: 14px;
+}
+
+.risk-guardian-page .ai-heading span {
+  font-size: 9px;
+}
+
+.risk-guardian-page .ai-summary strong {
+  font-size: 11px;
+}
+
+.risk-guardian-page .ai-summary p {
+  font-size: 10px;
+}
+
+.risk-guardian-page .ai-summary-item strong {
+  font-size: 10px;
+}
+
+.risk-guardian-page .ai-summary-item p {
+  font-size: 9px;
+}
+
+.risk-guardian-page .risk-history-details strong {
+  font-size: 11px;
+}
+
+.risk-guardian-page .risk-history-details span {
+  font-size: 9px;
+}
+
+.risk-guardian-page .risk-history-amount {
+  font-size: 11px;
+}
+
+.risk-guardian-page .risk-history-row .risk-badge {
+  font-size: 9px;
+}
+
+.risk-guardian-page .risk-history-score {
+  font-size: 10px;
+}
+
+.risk-guardian-page .history-view-button {
+  font-size: 9px;
+}
+
+.risk-guardian-page .risk-modal-label {
+  font-size: 9px;
+}
+
+.risk-guardian-page .risk-modal-header p {
+  font-size: 10px;
+}
+
+.risk-guardian-page .risk-score-card > div:first-child > span {
+  font-size: 10px;
+}
+
+.risk-guardian-page .risk-modal > .risk-info-grid span {
+  font-size: 9px;
+}
+
+.risk-guardian-page .risk-modal > .risk-info-grid strong {
+  font-size: 11px;
+}
+
+.risk-guardian-page .ai-explanation-title strong {
+  font-size: 11px;
+}
+
+.risk-guardian-page .ai-explanation li {
+  font-size: 10px;
+}
+
+.risk-guardian-page .ai-explanation p {
+  font-size: 10px;
+}
+
+.risk-guardian-page .risk-recommendation strong {
+  font-size: 11px;
+}
+
+.risk-guardian-page .risk-recommendation p {
+  font-size: 10px;
+}
+
+.risk-guardian-page .verify-button {
+  font-size: 10px;
+}
+
+.risk-guardian-page > .empty-state h3 {
+  font-size: 15px;
+}
+
+.risk-guardian-page > .empty-state p {
+  font-size: 11px;
+}
+
+/* =========================
+   MONEY INSIGHTS PAGE
+   ========================= */
+
+.money-insights-page .protected-badge {
+  font-size: 11px;
+}
+
+.money-insights-page .insight-summary-card p {
+  font-size: 12px;
+}
+
+.money-insights-page .insight-summary-card h2 span {
+  font-size: 13px;
+}
+
+.money-insights-page .panel-header h2 {
+  font-size: 19px;
+}
+
+.money-insights-page .panel-header p {
+  font-size: 13px;
+}
+
+.money-insights-page .ai-status {
+  font-size: 11px;
+}
+
+.money-insights-page .insight-title-row h3 {
+  font-size: 15px;
+}
+
+.money-insights-page .insight-tag {
+  font-size: 10px;
+}
+
+.money-insights-page .insight-content > p {
+  font-size: 13px;
+}
+
+.money-insights-page .insight-details-button {
+  font-size: 12px;
+}
+
+.money-insights-page .insight-value {
+  font-size: 15px;
+}
+
+.money-insights-page .money-score-panel > h3 {
+  font-size: 18px;
+}
+
+.money-insights-page .health-description {
+  font-size: 12px;
+}
+
+.money-insights-page .health-bar-item span,
+.money-insights-page .health-bar-item strong {
+  font-size: 12px;
+}
+
+.money-insights-page .empty-state h3 {
+  font-size: 17px;
+}
+
+.money-insights-page .empty-state p {
+  font-size: 13px;
+}
+
+.money-insights-page .insight-modal-body > p {
+  font-size: 14px;
+}
+
+.money-insights-page .insight-recommendation h3 {
+  font-size: 14px;
+}
+
+.money-insights-page .insight-recommendation p {
+  font-size: 13px;
+}
+
+.money-insights-page .review-button {
+  font-size: 13px;
+}
+
+/* =========================
+   WHAT-IF SIMULATOR
+   ========================= */
+
+.what-if-page .protected-badge {
+  font-size: 11px;
+}
+
+.what-if-page .simulator-form label {
+  font-size: 12px;
+}
+
+.what-if-page .input-with-symbol > span {
+  font-size: 13px;
+}
+
+.what-if-page .scenario-preview > span {
+  font-size: 11px;
+}
+
+.what-if-page .scenario-preview p {
+  font-size: 13px;
+}
+
+.what-if-page .projection-value span {
+  font-size: 12px;
+}
+
+.what-if-page .projection-stats span {
+  font-size: 11px;
+}
+
+.what-if-page .projection-stats strong {
+  font-size: 14px;
+}
+
+.what-if-page .ai-recommendation-panel h2 {
+  font-size: 19px;
+}
+
+.what-if-page .ai-recommendation-panel p {
+  font-size: 13px;
+}
+
+/* =========================
+   AI ASSISTANT
+   ========================= */
+
+.ai-assistant-page .protected-badge {
+  font-size: 11px;
+}
+
+.ai-assistant-page .ai-chat-header h2 {
+  font-size: 15px;
+}
+
+.ai-assistant-page .ai-chat-header > div:nth-child(2) span {
+  font-size: 12px;
+}
+
+.ai-assistant-page .ai-online {
+  font-size: 11px;
+}
+
+.ai-assistant-page .ai-message {
+  font-size: 13px;
+  line-height: 1.75;
+}
+
+.ai-assistant-page .ai-chat-input-area input {
+  font-size: 13px;
+}
+
+.ai-assistant-page .ai-quick-panel h2 {
+  font-size: 17px;
+}
+
+.ai-assistant-page .ai-quick-panel > p {
+  font-size: 12px;
+}
+
+.ai-assistant-page .ai-quick-panel button {
+  font-size: 12px;
+}
+
+/* =========================
+   AUTH PAGES
+   ========================= */
+
+.auth-brand strong {
+  font-size: 16px;
+}
+
+.auth-brand span {
+  font-size: 10px;
+}
+
+.auth-eyebrow {
+  font-size: 10px;
+}
+
+.auth-card-header p {
+  font-size: 12px;
+}
+
+.auth-field label {
+  font-size: 11px;
+}
+
+.auth-field input {
+  font-size: 13px;
+}
+
+.auth-submit-button {
+  font-size: 12px;
+}
+
+.auth-error strong {
+  font-size: 11px;
+}
+
+.auth-error span {
+  font-size: 10px;
+}
+
+.auth-divider em {
+  font-size: 10px;
+}
+
+.auth-signup {
+  font-size: 11px;
+}
+
+.auth-back-link {
+  font-size: 11px;
+}
+
+.auth-footer {
+  font-size: 9px;
+}
+
+.auth-success {
+  font-size: 10px;
+}
+
+/* =========================
+   GUEST PAGES
+   ========================= */
+
+.guest-dashboard-card p {
+  font-size: 14px;
+}
+
+.guest-profile-content p {
+  font-size: 12px;
+}
+
+.guest-transactions-card p {
+  font-size: 13px;
+}
+
+/* =========================
+   MOBILE READABILITY
+   ========================= */
+
+@media (max-width: 760px) {
+  .nav-item {
+    font-size: 11px;
+  }
+
+  .topbar-subtitle {
+    font-size: 12px;
+  }
+
+  .hero-content > p {
+    font-size: 12px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+  }
+
+  .stat-meta {
+    font-size: 10px;
+  }
+
+  .command-center-header p,
+  .command-card > p {
+    font-size: 10px;
+  }
+
+  .transaction-details strong {
+    font-size: 11px;
+  }
+
+  .transaction-details span {
+    font-size: 9px;
+  }
+
+  .transactions-page .search-box input {
+    font-size: 12px;
+  }
+
+  .filter-area select {
+    font-size: 11px;
+  }
+
+  .risk-guardian-page .page-header p,
+  .money-insights-page .page-header p,
+  .what-if-page .page-header p,
+  .ai-assistant-page .ai-assistant-header p {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 520px) {
+  .brand h2 {
+    font-size: 15px;
+  }
+
+  .profile-info strong {
+    font-size: 11px;
+  }
+
+  .profile-info span {
+    font-size: 9px;
+  }
+
+  .hero-content > p {
+    font-size: 11px;
+  }
+
+  .hero-metrics span {
+    font-size: 9px;
+  }
+
+  .hero-metrics strong {
+    font-size: 11px;
+  }
+
+  .command-card > p {
+    font-size: 10px;
+  }
+
+  .transaction-amount {
+    font-size: 10px;
+  }
+
+  .ai-assistant-page .ai-message {
+    font-size: 12px;
+  }
+
+  .ai-assistant-page .ai-chat-input-area input {
+    font-size: 12px;
+  }
+}
