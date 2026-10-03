@@ -18,20 +18,29 @@ app = FastAPI(
 )
 
 
+# ==================== CORS ====================
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:5174",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
+# ==================== DATABASE ====================
+
 @app.on_event("startup")
 def startup():
     init_db()
     migrate_database()
 
+
+# ==================== HEALTH CHECK ====================
 
 @app.get("/api/health")
 def health_check():
@@ -40,6 +49,8 @@ def health_check():
         "service": "Money Guardian AI API",
     }
 
+
+# ==================== ROUTES ====================
 
 app.include_router(transactions_router)
 app.include_router(risk_router)

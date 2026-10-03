@@ -4,9 +4,18 @@ from app.models.transaction import Transaction
 from app.services.risk_service import calculate_risk
 
 
-def generate_ai_response(question: str, db: Session):
+def generate_ai_response(
+    question: str,
+    db: Session,
+    user_id: int,
+):
+    # ---------------------------------------------------------
+    # USER-SPECIFIC TRANSACTIONS
+    # ---------------------------------------------------------
+    # Only load transactions belonging to the logged-in user.
     transactions = (
         db.query(Transaction)
+        .filter(Transaction.user_id == user_id)
         .order_by(Transaction.transaction_date.desc())
         .all()
     )
@@ -19,20 +28,29 @@ def generate_ai_response(question: str, db: Session):
             )
         }
 
-    question_lower = question.lower()
+    question_lower = question.lower().strip()
 
+    # ---------------------------------------------------------
+    # TOTAL INCOME
+    # ---------------------------------------------------------
     total_income = sum(
         transaction.amount
         for transaction in transactions
         if transaction.amount > 0
     )
 
+    # ---------------------------------------------------------
+    # TOTAL SPENDING
+    # ---------------------------------------------------------
     total_spending = sum(
         abs(transaction.amount)
         for transaction in transactions
         if transaction.amount < 0
     )
 
+    # ---------------------------------------------------------
+    # SAVINGS
+    # ---------------------------------------------------------
     savings = total_income - total_spending
 
     # ---------------------------------------------------------
@@ -76,6 +94,7 @@ def generate_ai_response(question: str, db: Session):
                     "merchant": transaction.merchant,
                     "risk_level": risk["risk_level"],
                     "risk_score": risk["risk_score"],
+                    "reasons": risk["reasons"],
                 }
             )
 
@@ -237,7 +256,9 @@ def generate_ai_response(question: str, db: Session):
                     f"transaction(s) requiring attention. "
                     f"The highest-risk transaction is "
                     f"{highest_risk['merchant']} with a "
-                    f"{highest_risk['risk_level']} risk level."
+                    f"{highest_risk['risk_level']} risk level "
+                    f"and a score of "
+                    f"{highest_risk['risk_score']}/100."
                 ),
                 "data": {
                     "risky_transactions": risky_transactions,

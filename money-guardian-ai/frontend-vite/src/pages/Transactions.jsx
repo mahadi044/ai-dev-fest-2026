@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import {
   getTransactions,
+  getRiskAnalysis,
   createTransaction,
   deleteTransaction,
 } from "../services/api";
@@ -10,18 +11,23 @@ import {
 function Transactions() {
   const navigate = useNavigate();
 
-  const [isAuthenticated, setIsAuthenticated] =
-    useState(Boolean(localStorage.getItem("access_token")));
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    Boolean(localStorage.getItem("access_token"))
+  );
 
   const [transactions, setTransactions] = useState([]);
+  const [riskData, setRiskData] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("All");
+
   const [selectedTransaction, setSelectedTransaction] =
     useState(null);
-  const [showAddModal, setShowAddModal] =
-    useState(false);
+
+  const [showAddModal, setShowAddModal] = useState(false);
   const [saving, setSaving] = useState(false);
 
   const [newTransaction, setNewTransaction] = useState({
@@ -30,7 +36,6 @@ function Transactions() {
     amount: "",
     transaction_type: "Expense",
     status: "Completed",
-    risk_level: "Low",
     transaction_date: new Date()
       .toISOString()
       .slice(0, 16),
@@ -40,9 +45,7 @@ function Transactions() {
     const token =
       localStorage.getItem("access_token") ||
       localStorage.getItem("token") ||
-      localStorage.getItem(
-        "moneyGuardianToken"
-      );
+      localStorage.getItem("moneyGuardianToken");
 
     setIsAuthenticated(Boolean(token));
   }, []);
@@ -50,6 +53,7 @@ function Transactions() {
   const loadTransactions = async () => {
     if (!isAuthenticated) {
       setTransactions([]);
+      setRiskData([]);
       setLoading(false);
       return;
     }
@@ -58,39 +62,40 @@ function Transactions() {
       setError("");
       setLoading(true);
 
-      const data = await getTransactions();
+      const [transactionResponse, riskResponse] =
+        await Promise.all([
+          getTransactions(),
+          getRiskAnalysis(),
+        ]);
 
       setTransactions(
-        Array.isArray(data) ? data : []
+        Array.isArray(transactionResponse)
+          ? transactionResponse
+          : []
+      );
+
+      setRiskData(
+        Array.isArray(riskResponse?.results)
+          ? riskResponse.results
+          : []
       );
     } catch (err) {
       console.error(
-        "Load transactions error:",
+        "Load transactions/risk error:",
         err
       );
 
-      const status =
-        err?.response?.status;
+      const status = err?.response?.status;
 
-      if (
-        status === 401 ||
-        status === 403
-      ) {
-        localStorage.removeItem(
-          "access_token"
-        );
-        localStorage.removeItem(
-          "token"
-        );
-        localStorage.removeItem(
-          "moneyGuardianToken"
-        );
-        localStorage.removeItem(
-          "moneyGuardianProfile"
-        );
+      if (status === 401 || status === 403) {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("token");
+        localStorage.removeItem("moneyGuardianToken");
+        localStorage.removeItem("moneyGuardianProfile");
 
         setIsAuthenticated(false);
         setTransactions([]);
+        setRiskData([]);
         setError("");
         return;
       }
@@ -107,19 +112,38 @@ function Transactions() {
     loadTransactions();
   }, [isAuthenticated]);
 
+  /*
+   * =========================================================
+   * MERGE TRANSACTIONS WITH CALCULATED RISK
+   * =========================================================
+   *
+   * Risk Guardian is the single source of truth for:
+   * risk_score
+   * risk_level
+   * reasons
+   */
+
   const formattedTransactions =
-    transactions.map(
-      (transaction) => ({
+    transactions.map((transaction) => {
+      const calculatedRisk =
+        riskData.find(
+          (risk) => risk.id === transaction.id
+        );
+
+      return {
         ...transaction,
 
         amount:
-          Number(
-            transaction?.amount
-          ) || 0,
+          Number(transaction?.amount) || 0,
 
         risk:
-          transaction?.risk_level ||
-          "Low",
+          calculatedRisk?.risk_level || "Low",
+
+        riskScore:
+          calculatedRisk?.risk_score ?? 0,
+
+        riskReasons:
+          calculatedRisk?.reasons || [],
 
         merchant:
           transaction?.merchant ||
@@ -136,20 +160,17 @@ function Transactions() {
         date: transaction?.transaction_date
           ? new Date(
               transaction.transaction_date
-            ).toLocaleString(
-              "en-US",
-              {
-                month: "short",
-                day: "2-digit",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-                hour12: true,
-              }
-            )
+            ).toLocaleString("en-US", {
+              month: "short",
+              day: "2-digit",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: true,
+            })
           : "Date unavailable",
-      })
-    );
+      };
+    });
 
   const filteredTransactions =
     formattedTransactions.filter(
@@ -167,8 +188,7 @@ function Transactions() {
 
         const matchesFilter =
           filter === "All" ||
-          transaction.category ===
-            filter;
+          transaction.category === filter;
 
         return (
           matchesSearch &&
@@ -181,16 +201,12 @@ function Transactions() {
     transactions
       .filter(
         (transaction) =>
-          Number(
-            transaction?.amount
-          ) > 0
+          Number(transaction?.amount) > 0
       )
       .reduce(
         (total, transaction) =>
           total +
-          Number(
-            transaction.amount
-          ),
+          Number(transaction.amount),
         0
       );
 
@@ -198,37 +214,34 @@ function Transactions() {
     transactions
       .filter(
         (transaction) =>
-          Number(
-            transaction?.amount
-          ) < 0
+          Number(transaction?.amount) < 0
       )
       .reduce(
         (total, transaction) =>
           total +
           Math.abs(
-            Number(
-              transaction.amount
-            )
+            Number(transaction.amount)
           ),
         0
       );
 
+  /*
+   * IMPORTANT:
+   * Flagged count now uses calculated risk,
+   * not database risk_level.
+   */
   const flaggedTransactions =
-    transactions.filter(
+    formattedTransactions.filter(
       (transaction) =>
-        transaction?.risk_level ===
-          "High" ||
-        transaction?.status ===
-          "Review"
+        transaction.risk === "High" ||
+        transaction.risk === "Medium"
     ).length;
 
   const handleAddTransaction =
     async (event) => {
       event.preventDefault();
 
-      if (
-        !isAuthenticated
-      ) {
+      if (!isAuthenticated) {
         navigate("/login");
         return;
       }
@@ -245,14 +258,10 @@ function Transactions() {
         setError("");
 
         const numericAmount =
-          Number(
-            newTransaction.amount
-          );
+          Number(newTransaction.amount);
 
         if (
-          !Number.isFinite(
-            numericAmount
-          ) ||
+          !Number.isFinite(numericAmount) ||
           numericAmount <= 0
         ) {
           setError(
@@ -264,13 +273,15 @@ function Transactions() {
         const finalAmount =
           newTransaction.transaction_type ===
           "Expense"
-            ? -Math.abs(
-                numericAmount
-              )
-            : Math.abs(
-                numericAmount
-              );
+            ? -Math.abs(numericAmount)
+            : Math.abs(numericAmount);
 
+        /*
+         * Do NOT send risk_level.
+         *
+         * Backend risk_service.py will calculate
+         * the actual risk from the transaction.
+         */
         await createTransaction({
           merchant:
             newTransaction.merchant.trim(),
@@ -286,9 +297,6 @@ function Transactions() {
           status:
             newTransaction.status,
 
-          risk_level:
-            newTransaction.risk_level,
-
           transaction_date:
             new Date(
               newTransaction.transaction_date
@@ -301,10 +309,8 @@ function Transactions() {
           merchant: "",
           category: "Food",
           amount: "",
-          transaction_type:
-            "Expense",
+          transaction_type: "Expense",
           status: "Completed",
-          risk_level: "Low",
           transaction_date:
             new Date()
               .toISOString()
@@ -325,9 +331,7 @@ function Transactions() {
           status === 401 ||
           status === 403
         ) {
-          setIsAuthenticated(
-            false
-          );
+          setIsAuthenticated(false);
 
           localStorage.removeItem(
             "access_token"
@@ -376,9 +380,7 @@ function Transactions() {
       try {
         setError("");
 
-        await deleteTransaction(
-          id
-        );
+        await deleteTransaction(id);
 
         setTransactions(
           (current) =>
@@ -388,13 +390,18 @@ function Transactions() {
             )
         );
 
+        setRiskData(
+          (current) =>
+            current.filter(
+              (transaction) =>
+                transaction.id !== id
+            )
+        );
+
         if (
-          selectedTransaction?.id ===
-          id
+          selectedTransaction?.id === id
         ) {
-          setSelectedTransaction(
-            null
-          );
+          setSelectedTransaction(null);
         }
       } catch (err) {
         console.error(
@@ -409,11 +416,9 @@ function Transactions() {
           status === 401 ||
           status === 403
         ) {
-          setIsAuthenticated(
-            false
-          );
+          setIsAuthenticated(false);
           setTransactions([]);
-
+          setRiskData([]);
           return;
         }
 
@@ -507,9 +512,7 @@ function Transactions() {
 
       <div className="transaction-summary">
         <div className="transaction-summary-card">
-          <span>
-            Total Transactions
-          </span>
+          <span>Total Transactions</span>
 
           <strong>
             {transactions.length}
@@ -517,9 +520,7 @@ function Transactions() {
         </div>
 
         <div className="transaction-summary-card">
-          <span>
-            Total Income
-          </span>
+          <span>Total Income</span>
 
           <strong>
             ৳
@@ -528,9 +529,7 @@ function Transactions() {
         </div>
 
         <div className="transaction-summary-card">
-          <span>
-            Total Spending
-          </span>
+          <span>Total Spending</span>
 
           <strong>
             ৳
@@ -539,9 +538,7 @@ function Transactions() {
         </div>
 
         <div className="transaction-summary-card">
-          <span>
-            Flagged Transactions
-          </span>
+          <span>Flagged Transactions</span>
 
           <strong>
             {flaggedTransactions}
@@ -578,9 +575,7 @@ function Transactions() {
 
           <p>{error}</p>
 
-          {error.includes(
-            "session"
-          ) && (
+          {error.includes("session") && (
             <button
               type="button"
               className="primary-button"
@@ -611,9 +606,7 @@ function Transactions() {
                   type="text"
                   placeholder="Search merchant or category..."
                   value={search}
-                  onChange={(
-                    event
-                  ) =>
+                  onChange={(event) =>
                     setSearch(
                       event.target.value
                     )
@@ -628,9 +621,7 @@ function Transactions() {
 
                 <select
                   value={filter}
-                  onChange={(
-                    event
-                  ) =>
+                  onChange={(event) =>
                     setFilter(
                       event.target.value
                     )
@@ -679,35 +670,19 @@ function Transactions() {
               <table className="transaction-table">
                 <thead>
                   <tr>
-                    <th>
-                      Transaction
-                    </th>
-                    <th>
-                      Category
-                    </th>
-                    <th>
-                      Date & Time
-                    </th>
-                    <th>
-                      Amount
-                    </th>
-                    <th>
-                      Status
-                    </th>
-                    <th>
-                      Risk
-                    </th>
-                    <th>
-                      Action
-                    </th>
+                    <th>Transaction</th>
+                    <th>Category</th>
+                    <th>Date & Time</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Risk</th>
+                    <th>Action</th>
                   </tr>
                 </thead>
 
                 <tbody>
                   {filteredTransactions.map(
-                    (
-                      transaction
-                    ) => (
+                    (transaction) => (
                       <tr
                         key={
                           transaction.id
@@ -866,9 +841,7 @@ function Transactions() {
         <div
           className="risk-modal-overlay"
           onClick={() =>
-            setShowAddModal(
-              false
-            )
+            setShowAddModal(false)
           }
         >
           <div
@@ -883,9 +856,7 @@ function Transactions() {
                   New Transaction
                 </span>
 
-                <h2>
-                  Add Transaction
-                </h2>
+                <h2>Add Transaction</h2>
 
                 <p>
                   Add a new financial
@@ -898,9 +869,7 @@ function Transactions() {
                 type="button"
                 className="risk-modal-close"
                 onClick={() =>
-                  setShowAddModal(
-                    false
-                  )
+                  setShowAddModal(false)
                 }
               >
                 ×
@@ -914,9 +883,7 @@ function Transactions() {
             >
               <div className="risk-info-grid add-transaction-grid">
                 <div>
-                  <span>
-                    Merchant
-                  </span>
+                  <span>Merchant</span>
 
                   <input
                     type="text"
@@ -924,27 +891,19 @@ function Transactions() {
                     value={
                       newTransaction.merchant
                     }
-                    onChange={(
-                      event
-                    ) =>
-                      setNewTransaction(
-                        {
-                          ...newTransaction,
-                          merchant:
-                            event
-                              .target
-                              .value,
-                        }
-                      )
+                    onChange={(event) =>
+                      setNewTransaction({
+                        ...newTransaction,
+                        merchant:
+                          event.target.value,
+                      })
                     }
                     required
                   />
                 </div>
 
                 <div>
-                  <span>
-                    Amount
-                  </span>
+                  <span>Amount</span>
 
                   <input
                     type="number"
@@ -954,44 +913,30 @@ function Transactions() {
                     value={
                       newTransaction.amount
                     }
-                    onChange={(
-                      event
-                    ) =>
-                      setNewTransaction(
-                        {
-                          ...newTransaction,
-                          amount:
-                            event
-                              .target
-                              .value,
-                        }
-                      )
+                    onChange={(event) =>
+                      setNewTransaction({
+                        ...newTransaction,
+                        amount:
+                          event.target.value,
+                      })
                     }
                     required
                   />
                 </div>
 
                 <div>
-                  <span>
-                    Category
-                  </span>
+                  <span>Category</span>
 
                   <select
                     value={
                       newTransaction.category
                     }
-                    onChange={(
-                      event
-                    ) =>
-                      setNewTransaction(
-                        {
-                          ...newTransaction,
-                          category:
-                            event
-                              .target
-                              .value,
-                        }
-                      )
+                    onChange={(event) =>
+                      setNewTransaction({
+                        ...newTransaction,
+                        category:
+                          event.target.value,
+                      })
                     }
                   >
                     <option value="Food">
@@ -1037,18 +982,12 @@ function Transactions() {
                     value={
                       newTransaction.transaction_type
                     }
-                    onChange={(
-                      event
-                    ) =>
-                      setNewTransaction(
-                        {
-                          ...newTransaction,
-                          transaction_type:
-                            event
-                              .target
-                              .value,
-                        }
-                      )
+                    onChange={(event) =>
+                      setNewTransaction({
+                        ...newTransaction,
+                        transaction_type:
+                          event.target.value,
+                      })
                     }
                   >
                     <option value="Expense">
@@ -1062,26 +1001,18 @@ function Transactions() {
                 </div>
 
                 <div>
-                  <span>
-                    Status
-                  </span>
+                  <span>Status</span>
 
                   <select
                     value={
                       newTransaction.status
                     }
-                    onChange={(
-                      event
-                    ) =>
-                      setNewTransaction(
-                        {
-                          ...newTransaction,
-                          status:
-                            event
-                              .target
-                              .value,
-                        }
-                      )
+                    onChange={(event) =>
+                      setNewTransaction({
+                        ...newTransaction,
+                        status:
+                          event.target.value,
+                      })
                     }
                   >
                     <option value="Completed">
@@ -1099,64 +1030,19 @@ function Transactions() {
                 </div>
 
                 <div>
-                  <span>
-                    Risk Level
-                  </span>
-
-                  <select
-                    value={
-                      newTransaction.risk_level
-                    }
-                    onChange={(
-                      event
-                    ) =>
-                      setNewTransaction(
-                        {
-                          ...newTransaction,
-                          risk_level:
-                            event
-                              .target
-                              .value,
-                        }
-                      )
-                    }
-                  >
-                    <option value="Low">
-                      Low
-                    </option>
-
-                    <option value="Medium">
-                      Medium
-                    </option>
-
-                    <option value="High">
-                      High
-                    </option>
-                  </select>
-                </div>
-
-                <div>
-                  <span>
-                    Date & Time
-                  </span>
+                  <span>Date & Time</span>
 
                   <input
                     type="datetime-local"
                     value={
                       newTransaction.transaction_date
                     }
-                    onChange={(
-                      event
-                    ) =>
-                      setNewTransaction(
-                        {
-                          ...newTransaction,
-                          transaction_date:
-                            event
-                              .target
-                              .value,
-                        }
-                      )
+                    onChange={(event) =>
+                      setNewTransaction({
+                        ...newTransaction,
+                        transaction_date:
+                          event.target.value,
+                      })
                     }
                     required
                   />
@@ -1168,9 +1054,7 @@ function Transactions() {
                   type="button"
                   className="secondary-button"
                   onClick={() =>
-                    setShowAddModal(
-                      false
-                    )
+                    setShowAddModal(false)
                   }
                 >
                   Cancel
@@ -1199,9 +1083,7 @@ function Transactions() {
         <div
           className="risk-modal-overlay"
           onClick={() =>
-            setSelectedTransaction(
-              null
-            )
+            setSelectedTransaction(null)
           }
         >
           <div
@@ -1234,9 +1116,7 @@ function Transactions() {
                 type="button"
                 className="risk-modal-close"
                 onClick={() =>
-                  setSelectedTransaction(
-                    null
-                  )
+                  setSelectedTransaction(null)
                 }
               >
                 ×
@@ -1245,22 +1125,14 @@ function Transactions() {
 
             <div className="risk-score-card">
               <div>
-                <span>
-                  AI Risk Score
-                </span>
+                <span>AI Risk Score</span>
 
                 <strong>
-                  {selectedTransaction.risk ===
-                  "High"
-                    ? "91"
-                    : selectedTransaction.risk ===
-                      "Medium"
-                    ? "58"
-                    : "12"}
+                  {
+                    selectedTransaction.riskScore
+                  }
 
-                  <small>
-                    /100
-                  </small>
+                  <small>/100</small>
                 </strong>
               </div>
 
@@ -1270,18 +1142,13 @@ function Transactions() {
                   selectedTransaction.risk.toLowerCase()
                 }
               >
-                {
-                  selectedTransaction.risk
-                }{" "}
-                Risk
+                {selectedTransaction.risk} Risk
               </div>
             </div>
 
             <div className="risk-info-grid">
               <div>
-                <span>
-                  Amount
-                </span>
+                <span>Amount</span>
 
                 <strong>
                   ৳
@@ -1294,9 +1161,7 @@ function Transactions() {
               </div>
 
               <div>
-                <span>
-                  Date & Time
-                </span>
+                <span>Date & Time</span>
 
                 <strong>
                   {
@@ -1306,9 +1171,7 @@ function Transactions() {
               </div>
 
               <div>
-                <span>
-                  Category
-                </span>
+                <span>Category</span>
 
                 <strong>
                   {
@@ -1318,9 +1181,7 @@ function Transactions() {
               </div>
 
               <div>
-                <span>
-                  Status
-                </span>
+                <span>Status</span>
 
                 <strong>
                   {
@@ -1330,88 +1191,53 @@ function Transactions() {
               </div>
             </div>
 
-            {selectedTransaction.risk ===
-            "High" ? (
-              <>
-                <div className="ai-explanation">
-                  <div className="ai-explanation-title">
-                    <span>
-                      AI
-                    </span>
+            <div className="ai-explanation">
+              <div className="ai-explanation-title">
+                <span>AI</span>
 
-                    <strong>
-                      Why is this
-                      transaction
-                      risky?
-                    </strong>
-                  </div>
-
-                  <ul>
-                    <li>
-                      Transaction was
-                      flagged as high
-                      risk by the
-                      risk system.
-                    </li>
-
-                    <li>
-                      The transaction
-                      amount may be
-                      unusual compared
-                      with normal
-                      activity.
-                    </li>
-
-                    <li>
-                      The transaction
-                      status requires
-                      review.
-                    </li>
-
-                    <li>
-                      Additional
-                      verification is
-                      recommended
-                      before taking
-                      action.
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="risk-recommendation">
-                  <div className="recommendation-icon">
-                    !
-                  </div>
-
-                  <div>
-                    <strong>
-                      Recommended
-                      Action
-                    </strong>
-
-                    <p>
-                      Verify this
-                      transaction
-                      before taking
-                      any further
-                      action.
-                    </p>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div className="safe-analysis">
                 <strong>
-                  No major risk
-                  signals detected.
+                  Why was this transaction
+                  assigned this risk level?
                 </strong>
+              </div>
 
+              {selectedTransaction.riskReasons
+                .length > 0 ? (
+                <ul>
+                  {selectedTransaction.riskReasons.map(
+                    (reason, index) => (
+                      <li key={index}>
+                        {reason}
+                      </li>
+                    )
+                  )}
+                </ul>
+              ) : (
                 <p>
-                  This transaction
-                  does not currently
-                  show major risk
-                  signals.
+                  No major risk signals
+                  detected.
                 </p>
+              )}
+            </div>
+
+            {selectedTransaction.risk ===
+              "High" && (
+              <div className="risk-recommendation">
+                <div className="recommendation-icon">
+                  !
+                </div>
+
+                <div>
+                  <strong>
+                    Recommended Action
+                  </strong>
+
+                  <p>
+                    Verify this
+                    transaction before
+                    taking further action.
+                  </p>
+                </div>
               </div>
             )}
 
@@ -1420,9 +1246,7 @@ function Transactions() {
                 type="button"
                 className="secondary-button"
                 onClick={() =>
-                  setSelectedTransaction(
-                    null
-                  )
+                  setSelectedTransaction(null)
                 }
               >
                 Close
@@ -1434,8 +1258,7 @@ function Transactions() {
                   type="button"
                   className="verify-button"
                 >
-                  Verify
-                  Transaction
+                  Verify Transaction
                 </button>
               )}
 
