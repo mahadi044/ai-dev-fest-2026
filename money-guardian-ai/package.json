@@ -4,5 +4,13 @@
     "lucide-react": "^1.49.0",
     "react-router-dom": "^7.18.4",
     "recharts": "^3.10.1"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.5"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n FRONTEND,BACKEND \"npm run frontend\" \"npm run backend\"",
+    "frontend": "npm --prefix frontend-vite run dev",
+    "backend": "cd backend && python -m uvicorn app.main:app --reload --port 8001"
   }
 }
