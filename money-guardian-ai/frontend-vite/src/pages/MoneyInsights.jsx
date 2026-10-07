@@ -1,22 +1,45 @@
 import { useEffect, useState } from "react";
-import { getMoneyInsights } from "../services/api";
+import {
+  getMoneyInsights,
+  getRiskPrediction,
+} from "../services/api";
 
 function MoneyInsights() {
   const [insights, setInsights] = useState([]);
   const [summary, setSummary] = useState(null);
+  const [prediction, setPrediction] = useState(null);
   const [selectedInsight, setSelectedInsight] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [predictionError, setPredictionError] = useState("");
 
   useEffect(() => {
     const loadInsights = async () => {
       try {
-        const data = await getMoneyInsights();
+        const [insightData, predictionData] = await Promise.all([
+          getMoneyInsights(),
+          getRiskPrediction(),
+        ]);
 
-        setSummary(data.summary);
-        setInsights(data.insights || []);
+        setSummary(insightData.summary);
+        setInsights(insightData.insights || []);
+        setPrediction(predictionData);
       } catch (err) {
-        setError("Failed to load money insights.");
+        console.error("Money Insights error:", err);
+
+        try {
+          const insightData = await getMoneyInsights();
+
+          setSummary(insightData.summary);
+          setInsights(insightData.insights || []);
+
+          setPredictionError(
+            "AI financial risk prediction is currently unavailable."
+          );
+        } catch (insightErr) {
+          console.error("Insight loading error:", insightErr);
+          setError("Failed to load money insights.");
+        }
       } finally {
         setLoading(false);
       }
@@ -38,16 +61,10 @@ function MoneyInsights() {
 
     let score = 100;
 
-    /*
-     * Spending above 50% reduces the score.
-     */
     if (spendingRate > 50) {
       score -= (spendingRate - 50) * 0.8;
     }
 
-    /*
-     * Savings below 20% reduces the score.
-     */
     if (savingsRate < 20) {
       score -= (20 - savingsRate) * 1.2;
     }
@@ -85,15 +102,23 @@ function MoneyInsights() {
       : 0;
 
   /*
-   * Risk Safety will later be connected
-   * directly with Risk Guardian data.
+   * ML-based Risk Safety.
+   *
+   * Higher predicted risk = lower financial safety.
+   * Example:
+   * 14% risk probability -> 86% risk safety.
    */
-  const riskSafety = 90;
+  const riskSafety =
+    prediction?.prediction_available
+      ? Math.max(
+          0,
+          Math.min(
+            100,
+            Math.round(100 - prediction.risk_probability * 100)
+          )
+        )
+      : 0;
 
-  /*
-   * Convert health score to circle angle.
-   * 100% = 360 degrees
-   */
   const healthProgress = financialHealth * 3.6;
 
   const formatAmount = (amount) =>
@@ -105,6 +130,14 @@ function MoneyInsights() {
       : financialHealth >= 40
       ? "Moderate Financial Health"
       : "Needs Improvement";
+
+  const predictionRiskLevel =
+    prediction?.risk_level || "Unavailable";
+
+  const predictionProbability =
+    prediction?.risk_probability != null
+      ? Math.round(prediction.risk_probability * 100)
+      : null;
 
   return (
     <div className="money-insights-page">
@@ -187,6 +220,129 @@ function MoneyInsights() {
             </div>
           </div>
 
+          {/* ================= AI FINANCIAL RISK ================= */}
+
+          <section className="panel" style={{ marginBottom: "24px" }}>
+            <div className="panel-header">
+              <div>
+                <h2>AI Financial Risk Prediction</h2>
+
+                <p>
+                  Machine learning analysis of your current spending behavior
+                  and future financial risk.
+                </p>
+              </div>
+
+              <span className="ai-status">
+                ML Active
+              </span>
+            </div>
+
+            {prediction && prediction.prediction_available ? (
+              <>
+                <div className="insights-summary-grid">
+                  <div className="insight-summary-card">
+                    <span className="summary-icon">
+                      Risk
+                    </span>
+
+                    <div>
+                      <p>Risk Probability</p>
+
+                      <h2>
+                        {predictionProbability}%
+                      </h2>
+                    </div>
+                  </div>
+
+                  <div className="insight-summary-card">
+                    <span className="summary-icon">
+                      Level
+                    </span>
+
+                    <div>
+                      <p>Predicted Risk</p>
+
+                      <h2>
+                        {predictionRiskLevel}
+                      </h2>
+                    </div>
+                  </div>
+
+                  <div className="insight-summary-card">
+                    <span className="summary-icon">
+                      Safety
+                    </span>
+
+                    <div>
+                      <p>Risk Safety</p>
+
+                      <h2>
+                        {riskSafety}%
+                      </h2>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="health-description">
+                  <strong>
+                    30-Day Financial Risk Prediction
+                  </strong>
+
+                  <p>
+                    The Random Forest model estimates the likelihood that
+                    your current financial behavior may lead to a
+                    high-risk state within the next 30 days.
+                  </p>
+                </div>
+
+                {prediction.explanations?.length > 0 && (
+                  <div className="insight-recommendation">
+                    <h3>AI Analysis</h3>
+
+                    {prediction.explanations.map(
+                      (explanation, index) => (
+                        <p key={index}>
+                          • {explanation}
+                        </p>
+                      )
+                    )}
+                  </div>
+                )}
+
+                <p
+                  style={{
+                    marginTop: "16px",
+                    opacity: 0.7,
+                    fontSize: "13px",
+                  }}
+                >
+                  Random Forest AI model • Version{" "}
+                  {prediction.model_version || "1.2.0"} •
+                  Prediction threshold{" "}
+                  {Math.round(
+                    (prediction.prediction_threshold || 0.35) * 100
+                  )}
+                  %
+                </p>
+              </>
+            ) : (
+              <div className="empty-state">
+                <h3>
+                  AI prediction unavailable
+                </h3>
+
+                <p>
+                  {predictionError ||
+                    prediction?.message ||
+                    "More transaction data is needed for financial risk prediction."}
+                </p>
+              </div>
+            )}
+          </section>
+
+          {/* ================= EXISTING INSIGHTS ================= */}
+
           <div className="insights-main-grid">
             <section className="panel">
               <div className="panel-header">
@@ -263,6 +419,8 @@ function MoneyInsights() {
                 )}
               </div>
             </section>
+
+            {/* ================= MONEY HEALTH ================= */}
 
             <section className="panel money-score-panel">
               <div className="panel-header">
@@ -347,6 +505,8 @@ function MoneyInsights() {
           </div>
         </>
       )}
+
+      {/* ================= INSIGHT MODAL ================= */}
 
       {selectedInsight && (
         <div
