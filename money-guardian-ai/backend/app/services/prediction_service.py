@@ -290,3 +290,253 @@ def predict_financial_risk(transactions):
 
         "features": features,
     }
+
+# ============================================================
+# WHAT-IF SCENARIO RISK PREDICTION
+# ============================================================
+
+def predict_what_if_risk(transactions, monthly_saving):
+    """
+    Predict financial risk for a What-If saving scenario.
+
+    The scenario does not create or save fake transactions.
+    It adjusts the current behavioral features to estimate
+    how a different monthly saving target could affect risk.
+    """
+
+    # --------------------------------------------------------
+    # Load trained model
+    # --------------------------------------------------------
+
+    model_package = load_prediction_model()
+
+    model = model_package["model"]
+    scaler = model_package["scaler"]
+
+    threshold = model_package.get(
+        "threshold",
+        0.35,
+    )
+
+    model_version = model_package.get(
+        "model_version",
+        "rf-risk-v1",
+    )
+
+    # --------------------------------------------------------
+    # Current behavioral features
+    # --------------------------------------------------------
+
+    current_features = build_behavior_features(
+        transactions
+    )
+
+    # --------------------------------------------------------
+    # Current income
+    # --------------------------------------------------------
+
+    monthly_income = float(
+        current_features.get(
+            "monthly_income",
+            0,
+        )
+    )
+
+    # --------------------------------------------------------
+    # Scenario saving cannot be negative
+    # --------------------------------------------------------
+
+    scenario_saving = max(
+        0.0,
+        float(monthly_saving),
+    )
+
+    # --------------------------------------------------------
+    # Estimate scenario expense
+    #
+    # income = expense + saving
+    # --------------------------------------------------------
+
+    scenario_expense = max(
+        0.0,
+        monthly_income - scenario_saving,
+    )
+
+    # --------------------------------------------------------
+    # Copy current features
+    # --------------------------------------------------------
+
+    scenario_features = dict(
+        current_features
+    )
+
+    # --------------------------------------------------------
+    # Update scenario-dependent features
+    # --------------------------------------------------------
+
+    scenario_features[
+        "monthly_expense"
+    ] = round(
+        scenario_expense,
+        2,
+    )
+
+    if monthly_income > 0:
+
+        scenario_features[
+            "savings_ratio"
+        ] = round(
+            scenario_saving / monthly_income,
+            4,
+        )
+
+    else:
+
+        scenario_features[
+            "savings_ratio"
+        ] = 0.0
+
+    # --------------------------------------------------------
+    # Approximate average expense for scenario
+    # --------------------------------------------------------
+
+    transaction_count = int(
+        scenario_features.get(
+            "transaction_count",
+            0,
+        )
+    )
+
+    expense_frequency = float(
+        scenario_features.get(
+            "expense_frequency",
+            0,
+        )
+    )
+
+    estimated_expense_transactions = max(
+        1,
+        round(
+            expense_frequency
+            * max(transaction_count, 1)
+        ),
+    )
+
+    scenario_features[
+        "avg_expense"
+    ] = round(
+        scenario_expense
+        / estimated_expense_transactions,
+        2,
+    )
+
+    # --------------------------------------------------------
+    # Convert to model vector
+    # --------------------------------------------------------
+
+    feature_vector = features_to_vector(
+        scenario_features
+    )
+
+    X = np.array(
+        [feature_vector],
+        dtype=float,
+    )
+
+    # --------------------------------------------------------
+    # Scale
+    # --------------------------------------------------------
+
+    X_scaled = scaler.transform(X)
+
+    # --------------------------------------------------------
+    # Predict
+    # --------------------------------------------------------
+
+    probability = float(
+        model.predict_proba(X_scaled)[0][1]
+    )
+
+    # --------------------------------------------------------
+    # Risk classification
+    # --------------------------------------------------------
+
+    if probability >= 0.65:
+
+        risk_level = "High"
+
+    elif probability >= threshold:
+
+        risk_level = "Medium"
+
+    else:
+
+        risk_level = "Low"
+
+    risk_score = round(
+        probability * 100,
+        2,
+    )
+
+    # --------------------------------------------------------
+    # Scenario explanation
+    # --------------------------------------------------------
+
+    if scenario_saving >= monthly_income * 0.30:
+
+        explanation = (
+            "This saving scenario keeps a healthy portion "
+            "of your income available as savings."
+        )
+
+    elif scenario_saving >= monthly_income * 0.15:
+
+        explanation = (
+            "This scenario maintains a moderate savings "
+            "level while allowing regular spending."
+        )
+
+    else:
+
+        explanation = (
+            "This scenario leaves a relatively small "
+            "portion of income as savings."
+        )
+
+    return {
+        "scenario_monthly_saving": round(
+            scenario_saving,
+            2,
+        ),
+
+        "scenario_monthly_expense": round(
+            scenario_expense,
+            2,
+        ),
+
+        "monthly_income": round(
+            monthly_income,
+            2,
+        ),
+
+        "risk_probability": round(
+            probability,
+            4,
+        ),
+
+        "risk_score": risk_score,
+
+        "risk_level": risk_level,
+
+        "high_risk_prediction": (
+            probability >= threshold
+        ),
+
+        "prediction_threshold": threshold,
+
+        "model_version": model_version,
+
+        "explanation": explanation,
+
+        "features": scenario_features,
+    }

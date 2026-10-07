@@ -1,10 +1,20 @@
 import axios from "axios";
 
+// ============================================================
+// API CONFIGURATION
+// ============================================================
+
 const api = axios.create({
   baseURL: "http://127.0.0.1:8001/api",
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
-// Automatically attach JWT token to every API request
+// ============================================================
+// AUTH TOKEN INTERCEPTOR
+// ============================================================
+
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -18,27 +28,28 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// ==================== AUTH ====================
+// ============================================================
+// AUTHENTICATION
+// ============================================================
 
 export const signup = async (userData) => {
-  const response = await api.post("/auth/signup", userData);
-  return response.data;
+  const { data } = await api.post("/auth/signup", userData);
+  return data;
 };
 
 export const login = async (loginData) => {
-  const response = await api.post("/auth/login", loginData);
+  const { data } = await api.post("/auth/login", loginData);
 
-  // Save JWT token
-  if (response.data.access_token) {
-    localStorage.setItem("token", response.data.access_token);
+  if (data.access_token) {
+    localStorage.setItem("token", data.access_token);
   }
 
-  return response.data;
+  return data;
 };
 
 export const getCurrentUser = async () => {
-  const response = await api.get("/auth/me");
-  return response.data;
+  const { data } = await api.get("/auth/me");
+  return data;
 };
 
 export const logout = () => {
@@ -46,39 +57,69 @@ export const logout = () => {
   localStorage.removeItem("moneyGuardianProfile");
 };
 
-// ==================== TRANSACTIONS ====================
+// ============================================================
+// TRANSACTIONS
+// ============================================================
 
 export const getTransactions = async () => {
-  const response = await api.get("/transactions/");
-  return response.data;
+  const { data } = await api.get("/transactions/");
+  return data;
 };
 
 export const createTransaction = async (transaction) => {
-  const response = await api.post("/transactions/", transaction);
-  return response.data;
+  const { data } = await api.post("/transactions/", transaction);
+  return data;
 };
 
 export const deleteTransaction = async (id) => {
-  const response = await api.delete(`/transactions/${id}`);
-  return response.data;
+  const { data } = await api.delete(`/transactions/${id}`);
+  return data;
 };
 
-// ==================== ANALYSIS ====================
+// ============================================================
+// RULE-BASED RISK ANALYSIS
+// ============================================================
 
 export const getRiskAnalysis = async () => {
-  const response = await api.get("/risk/");
-  return response.data;
+  const { data } = await api.get("/risk/");
+  return data;
 };
 
-// AI / ML Financial Risk Prediction
+// ============================================================
+// AI / ML FINANCIAL RISK PREDICTION
+// ============================================================
+
 export const getRiskPrediction = async () => {
-  const response = await api.get("/prediction/");
-  return response.data;
+  const { data } = await api.get("/prediction/");
+  return data;
 };
+
+// ============================================================
+// WHAT-IF ML RISK PREDICTION
+// ============================================================
+
+export const getWhatIfRiskPrediction = async (monthlySaving) => {
+  const { data } = await api.get("/prediction/what-if", {
+    params: {
+      monthly_saving: Number(monthlySaving),
+    },
+  });
+
+  return data;
+};
+
+// ============================================================
+// MONEY INSIGHTS
+// ============================================================
 
 export const getMoneyInsights = async () => {
-  const response = await api.get("/insights/");
-  return response.data;
+  const { data } = await api.get("/insights/");
+  return data;
 };
 
+// ============================================================
+// DEFAULT EXPORT
+// ============================================================
+
 export default api;
+

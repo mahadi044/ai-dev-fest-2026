@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import api from "../services/api";
 
 function Login() {
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -24,67 +26,39 @@ function Login() {
     setError("");
 
     try {
-      /*
-       * Backend expects:
-       * POST /api/auth/login?email=...&password=...
-       */
-      const response = await api.post(
-        "/auth/login",
-        null,
-        {
-          params: {
-            email: cleanEmail,
-            password: password,
-          },
-        }
-      );
+      // Backend endpoint:
+      // POST /api/auth/login?email=...&password=...
 
-      console.log(
-        "LOGIN RESPONSE:",
-        response.data
-      );
+      const response = await api.post("/auth/login", null, {
+        params: {
+          email: cleanEmail,
+          password: password,
+        },
+      });
 
-      const token =
-        response?.data?.access_token;
+      console.log("LOGIN RESPONSE:", response.data);
 
-      const user =
-        response?.data?.user;
+      const data = response.data;
+
+      const token = data?.access_token;
+      const user = data?.user;
 
       if (!token) {
-        throw new Error(
-          "No access token returned by server."
-        );
+        throw new Error("No access token returned by server.");
       }
 
-      /*
-       * Save token using multiple compatible keys.
-       * This makes the login compatible with the
-       * existing API interceptor.
-       */
-      localStorage.setItem(
-        "access_token",
-        token
-      );
+      // Save authentication token
+      localStorage.setItem("token", token);
+      localStorage.setItem("access_token", token);
+      localStorage.setItem("moneyGuardianToken", token);
 
-      localStorage.setItem(
-        "token",
-        token
-      );
-
-      localStorage.setItem(
-        "moneyGuardianToken",
-        token
-      );
-
-      /*
-       * Save current logged-in user.
-       */
+      // Save user profile
       const profile = {
+        id: user?.id,
         name:
           user?.name ||
           user?.full_name ||
           "Your Profile",
-
         email:
           user?.email ||
           cleanEmail,
@@ -95,56 +69,50 @@ function Login() {
         JSON.stringify(profile)
       );
 
-      /*
-       * IMPORTANT:
-       * Reload the whole application so AppShell
-       * starts again and detects the new token.
-       */
-      window.location.href = "/";
+      // Notify other parts of the application
+      window.dispatchEvent(new Event("storage"));
+
+      console.log("LOGIN SUCCESS");
+      console.log("USER:", profile);
+
+      // Go to dashboard/home
+      navigate("/", { replace: true });
     } catch (requestError) {
-      console.error(
-        "LOGIN ERROR:",
-        requestError
-      );
+      console.error("LOGIN ERROR:", requestError);
 
-      const status =
-        requestError?.response?.status;
+      if (requestError?.response) {
+        const status = requestError.response.status;
 
-      const detail =
-        requestError?.response?.data?.detail;
+        const detail = requestError.response.data?.detail;
+        const message = requestError.response.data?.message;
 
-      const message =
-        requestError?.response?.data?.message;
-
-      if (status === 401) {
-        setError(
-          "Invalid email or password."
-        );
-      } else if (status === 422) {
-        setError(
-          "Invalid login request."
-        );
+        if (status === 401) {
+          setError("Invalid email or password.");
+        } else if (status === 422) {
+          setError("Invalid login request.");
+        } else if (typeof detail === "string") {
+          setError(detail);
+        } else if (typeof message === "string") {
+          setError(message);
+        } else {
+          setError(
+            `Login failed. Server returned status ${status}.`
+          );
+        }
       } else if (
-        typeof detail === "string"
-      ) {
-        setError(detail);
-      } else if (
-        typeof message === "string"
-      ) {
-        setError(message);
-      } else if (
-        requestError?.message ===
-        "Network Error"
+        requestError?.code === "ERR_NETWORK" ||
+        requestError?.message === "Network Error"
       ) {
         setError(
-          "Cannot connect to the backend. Please make sure the backend is running."
+          "Cannot connect to the backend. Please make sure the backend is running on port 8001."
         );
       } else {
         setError(
-          "Login failed. Please try again."
+          requestError?.message ||
+            "Login failed. Please try again."
         );
       }
-
+    } finally {
       setLoading(false);
     }
   }
@@ -228,9 +196,7 @@ function Login() {
                 type="email"
                 value={email}
                 onChange={(event) => {
-                  setEmail(
-                    event.target.value
-                  );
+                  setEmail(event.target.value);
 
                   if (error) {
                     setError("");
@@ -253,9 +219,7 @@ function Login() {
                 type="password"
                 value={password}
                 onChange={(event) => {
-                  setPassword(
-                    event.target.value
-                  );
+                  setPassword(event.target.value);
 
                   if (error) {
                     setError("");
@@ -324,3 +288,4 @@ function Login() {
 }
 
 export default Login;
+
