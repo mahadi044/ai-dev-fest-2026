@@ -70,6 +70,12 @@ export const getRiskAnalysis = async () => {
   return response.data;
 };
 
+// AI / ML Financial Risk Prediction
+export const getRiskPrediction = async () => {
+  const response = await api.get("/prediction/");
+  return response.data;
+};
+
 export const getMoneyInsights = async () => {
   const response = await api.get("/insights/");
   return response.data;

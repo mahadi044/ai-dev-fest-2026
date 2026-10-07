@@ -1,21 +1,64 @@
 ﻿import { useEffect, useState } from "react";
-import { getRiskAnalysis } from "../services/api";
+import {
+  getRiskAnalysis,
+  getRiskPrediction,
+} from "../services/api";
 
 function RiskGuardian() {
   const [riskData, setRiskData] = useState([]);
+  const [predictionData, setPredictionData] = useState(null);
+
   const [loading, setLoading] = useState(true);
+  const [predictionLoading, setPredictionLoading] = useState(true);
+
   const [error, setError] = useState("");
+  const [predictionError, setPredictionError] = useState("");
+
   const [selectedRisk, setSelectedRisk] = useState(null);
 
   useEffect(() => {
     const loadRiskAnalysis = async () => {
       try {
-        const data = await getRiskAnalysis();
-        setRiskData(data.results || []);
+        const [riskResult, predictionResult] = await Promise.all([
+          getRiskAnalysis(),
+          getRiskPrediction(),
+        ]);
+
+        setRiskData(riskResult.results || []);
+
+        if (predictionResult?.prediction_available) {
+          setPredictionData(predictionResult);
+        } else {
+          setPredictionData(null);
+        }
       } catch (err) {
-        setError("Failed to load risk analysis.");
+        console.error("Risk Guardian error:", err);
+
+        // Try rule-based risk analysis separately
+        try {
+          const riskResult = await getRiskAnalysis();
+          setRiskData(riskResult.results || []);
+        } catch (riskErr) {
+          console.error("Rule-based risk analysis error:", riskErr);
+          setError("Failed to load risk analysis.");
+        }
+
+        // ML prediction can fail independently
+        try {
+          const predictionResult = await getRiskPrediction();
+
+          if (predictionResult?.prediction_available) {
+            setPredictionData(predictionResult);
+          }
+        } catch (predictionErr) {
+          console.error("ML prediction error:", predictionErr);
+          setPredictionError(
+            "Financial risk prediction is currently unavailable."
+          );
+        }
       } finally {
         setLoading(false);
+        setPredictionLoading(false);
       }
     };
 
@@ -61,12 +104,27 @@ function RiskGuardian() {
   const formatAmount = (amount) =>
     `Tk ${Math.abs(amount).toLocaleString()}`;
 
+  const predictionProbability = predictionData
+    ? Math.round((predictionData.risk_probability || 0) * 100)
+    : 0;
+
+  const predictionScore = predictionData
+    ? Math.round(predictionData.risk_score || 0)
+    : 0;
+
+  const predictionLevel = predictionData?.risk_level || "Low";
+
+  const predictionLevelClass =
+    predictionLevel.toLowerCase();
+
   return (
     <div className="risk-guardian-page">
       <div className="page-header">
         <div>
           <span className="eyebrow">AI SECURITY</span>
+
           <h1>Risk Guardian</h1>
+
           <p>
             Monitor your transactions and understand potential financial risks.
           </p>
@@ -80,6 +138,7 @@ function RiskGuardian() {
       {loading && (
         <div className="empty-state">
           <h3>Analyzing transactions...</h3>
+
           <p>
             Please wait while Risk Guardian analyzes your financial activity.
           </p>
@@ -89,6 +148,7 @@ function RiskGuardian() {
       {error && (
         <div className="empty-state">
           <h3>Unable to load risk analysis</h3>
+
           <p>{error}</p>
         </div>
       )}
@@ -98,7 +158,9 @@ function RiskGuardian() {
           <section className="risk-overview-grid">
             <div className="guardian-score-card">
               <div>
-                <span className="card-label">OVERALL RISK SCORE</span>
+                <span className="card-label">
+                  OVERALL RISK SCORE
+                </span>
 
                 <div className="guardian-score">
                   <strong>{averageRisk}</strong>
@@ -107,6 +169,7 @@ function RiskGuardian() {
 
                 <div className="guardian-status">
                   <span>●</span>
+
                   {averageRisk >= 70
                     ? "High Risk"
                     : averageRisk >= 40
@@ -128,14 +191,24 @@ function RiskGuardian() {
             </div>
 
             <div className="risk-stat-card">
-              <span className="card-label">TRANSACTIONS ANALYZED</span>
+              <span className="card-label">
+                TRANSACTIONS ANALYZED
+              </span>
+
               <strong>{riskData.length}</strong>
-              <p>Transactions checked by Risk Guardian</p>
+
+              <p>
+                Transactions checked by Risk Guardian
+              </p>
             </div>
 
             <div className="risk-stat-card warning-card">
-              <span className="card-label">FLAGGED TRANSACTIONS</span>
+              <span className="card-label">
+                FLAGGED TRANSACTIONS
+              </span>
+
               <strong>{flaggedTransactions.length}</strong>
+
               <p>
                 {highRiskTransactions.length} high-risk and{" "}
                 {mediumRiskTransactions.length} medium-risk transaction
@@ -144,12 +217,172 @@ function RiskGuardian() {
             </div>
           </section>
 
+          {/* ============================= */}
+          {/* ML FINANCIAL RISK PREDICTION */}
+          {/* ============================= */}
+
+          <section className="panel guardian-ai-panel">
+            <div className="ai-heading">
+              <div className="ai-mark">✦</div>
+
+              <div>
+                <h3>Financial Risk Prediction</h3>
+
+                <span>
+                  AI prediction based on your spending behavior
+                </span>
+              </div>
+            </div>
+
+            {predictionLoading ? (
+              <div className="ai-summary">
+                <strong>Analyzing financial behavior...</strong>
+
+                <p>
+                  AI is evaluating your transaction patterns and predicting
+                  your future financial risk.
+                </p>
+              </div>
+            ) : predictionError ? (
+              <div className="ai-summary">
+                <strong>Prediction unavailable</strong>
+
+                <p>{predictionError}</p>
+              </div>
+            ) : predictionData ? (
+              <>
+                <div className="ai-summary">
+                  <strong>
+                    {predictionLevel === "High"
+                      ? "High financial risk predicted."
+                      : predictionLevel === "Medium"
+                      ? "Moderate financial risk predicted."
+                      : "Your current spending behavior appears relatively stable."}
+                  </strong>
+
+                  <p>
+                    Based on your current financial behavior, the AI estimates
+                    your risk of entering a high-risk financial state in the
+                    next 30 days.
+                  </p>
+                </div>
+
+                <div className="risk-info-grid">
+                  <div>
+                    <span>Risk Probability</span>
+
+                    <strong>
+                      {predictionProbability}%
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>AI Risk Score</span>
+
+                    <strong>
+                      {predictionScore}/100
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>Predicted Level</span>
+
+                    <strong className={`risk-badge ${predictionLevelClass}`}>
+                      {predictionLevel}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <span>Transactions Analyzed</span>
+
+                    <strong>
+                      {predictionData.transactions_analyzed}
+                    </strong>
+                  </div>
+                </div>
+
+                {predictionData.explanations &&
+                  predictionData.explanations.length > 0 && (
+                    <div className="ai-explanation">
+                      <div className="ai-explanation-title">
+                        <span>AI</span>
+
+                        <strong>
+                          Why did AI make this prediction?
+                        </strong>
+                      </div>
+
+                      <ul>
+                        {predictionData.explanations.map(
+                          (explanation, index) => (
+                            <li key={index}>
+                              {explanation}
+                            </li>
+                          )
+                        )}
+                      </ul>
+                    </div>
+                  )}
+
+                <div className="ai-summary-item">
+                  <span>✓</span>
+
+                  <div>
+                    <strong>
+                      Prediction Model
+                    </strong>
+
+                    <p>
+                      Random Forest AI model • Version{" "}
+                      {predictionData.model_version || "1.2.0"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="ai-summary-item">
+                  <span>!</span>
+
+                  <div>
+                    <strong>
+                      Prediction Threshold
+                    </strong>
+
+                    <p>
+                      High-risk classification begins at{" "}
+                      {Math.round(
+                        (predictionData.prediction_threshold || 0.35) *
+                          100
+                      )}
+                      % probability.
+                    </p>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="ai-summary">
+                <strong>Not enough transaction data</strong>
+
+                <p>
+                  Add more transactions to allow the AI model to analyze your
+                  financial behavior.
+                </p>
+              </div>
+            )}
+          </section>
+
+          {/* ============================= */}
+          {/* EXISTING RULE-BASED ANALYSIS */}
+          {/* ============================= */}
+
           <section className="guardian-main-grid">
             <div className="panel guardian-alert-panel">
               <div className="panel-header">
                 <div>
                   <h3>Attention required</h3>
-                  <p>Transactions with unusual activity patterns.</p>
+
+                  <p>
+                    Transactions with unusual activity patterns.
+                  </p>
                 </div>
 
                 <span className="alert-count">
@@ -159,8 +392,13 @@ function RiskGuardian() {
 
               {highRiskTransactions.length > 0 ? (
                 highRiskTransactions.slice(0, 1).map((transaction) => (
-                  <div className="high-risk-card" key={transaction.id}>
-                    <div className="high-risk-icon">!</div>
+                  <div
+                    className="high-risk-card"
+                    key={transaction.id}
+                  >
+                    <div className="high-risk-icon">
+                      !
+                    </div>
 
                     <div className="high-risk-info">
                       <div className="risk-title-row">
@@ -169,7 +407,9 @@ function RiskGuardian() {
 
                           <span>
                             {transaction.category} |{" "}
-                            {formatDate(transaction.transaction_date)}
+                            {formatDate(
+                              transaction.transaction_date
+                            )}
                           </span>
                         </div>
 
@@ -185,7 +425,9 @@ function RiskGuardian() {
 
                       <button
                         className="review-button"
-                        onClick={() => setSelectedRisk(transaction)}
+                        onClick={() =>
+                          setSelectedRisk(transaction)
+                        }
                       >
                         Review transaction →
                       </button>
@@ -194,7 +436,10 @@ function RiskGuardian() {
                 ))
               ) : (
                 <div className="safe-analysis">
-                  <strong>No high-risk transactions detected.</strong>
+                  <strong>
+                    No high-risk transactions detected.
+                  </strong>
+
                   <p>
                     Your current transaction activity does not contain any
                     high-risk transaction.
@@ -209,7 +454,10 @@ function RiskGuardian() {
 
                 <div>
                   <h3>AI Risk Summary</h3>
-                  <span>Based on current transaction analysis</span>
+
+                  <span>
+                    Based on current transaction analysis
+                  </span>
                 </div>
               </div>
 
@@ -236,7 +484,8 @@ function RiskGuardian() {
                   <strong>Normal activity</strong>
 
                   <p>
-                    {riskData.length - flaggedTransactions.length} transaction
+                    {riskData.length - flaggedTransactions.length}{" "}
+                    transaction
                     {riskData.length - flaggedTransactions.length !== 1
                       ? "s"
                       : ""}{" "}
@@ -265,13 +514,19 @@ function RiskGuardian() {
             <div className="panel-header">
               <div>
                 <h3>Recent risk activity</h3>
-                <p>Risk analysis of your latest transactions.</p>
+
+                <p>
+                  Risk analysis of your latest transactions.
+                </p>
               </div>
             </div>
 
             <div className="risk-history-list">
               {riskData.map((transaction) => (
-                <div className="risk-history-row" key={transaction.id}>
+                <div
+                  className="risk-history-row"
+                  key={transaction.id}
+                >
                   <div className="risk-history-icon">
                     {transaction.risk_level === "High"
                       ? "!"
@@ -281,11 +536,15 @@ function RiskGuardian() {
                   </div>
 
                   <div className="risk-history-details">
-                    <strong>{transaction.merchant}</strong>
+                    <strong>
+                      {transaction.merchant}
+                    </strong>
 
                     <span>
                       {transaction.category} |{" "}
-                      {formatDate(transaction.transaction_date)}
+                      {formatDate(
+                        transaction.transaction_date
+                      )}
                     </span>
                   </div>
 
@@ -308,7 +567,9 @@ function RiskGuardian() {
 
                   <button
                     className="history-view-button"
-                    onClick={() => setSelectedRisk(transaction)}
+                    onClick={() =>
+                      setSelectedRisk(transaction)
+                    }
                   >
                     View
                   </button>
@@ -326,7 +587,9 @@ function RiskGuardian() {
         >
           <div
             className="risk-modal"
-            onClick={(event) => event.stopPropagation()}
+            onClick={(event) =>
+              event.stopPropagation()
+            }
           >
             <div className="risk-modal-header">
               <div>
@@ -338,7 +601,9 @@ function RiskGuardian() {
 
                 <p>
                   {selectedRisk.category} |{" "}
-                  {formatDate(selectedRisk.transaction_date)}
+                  {formatDate(
+                    selectedRisk.transaction_date
+                  )}
                 </p>
               </div>
 
@@ -381,17 +646,26 @@ function RiskGuardian() {
 
               <div>
                 <span>Category</span>
-                <strong>{selectedRisk.category}</strong>
+
+                <strong>
+                  {selectedRisk.category}
+                </strong>
               </div>
 
               <div>
                 <span>Risk Level</span>
-                <strong>{selectedRisk.risk_level}</strong>
+
+                <strong>
+                  {selectedRisk.risk_level}
+                </strong>
               </div>
 
               <div>
                 <span>Analysis</span>
-                <strong>Risk Pattern Detection</strong>
+
+                <strong>
+                  Risk Pattern Detection
+                </strong>
               </div>
             </div>
 
@@ -406,24 +680,35 @@ function RiskGuardian() {
 
               {selectedRisk.reasons.length > 0 ? (
                 <ul>
-                  {selectedRisk.reasons.map((reason, index) => (
-                    <li key={index}>{reason}</li>
-                  ))}
+                  {selectedRisk.reasons.map(
+                    (reason, index) => (
+                      <li key={index}>
+                        {reason}
+                      </li>
+                    )
+                  )}
                 </ul>
               ) : (
-                <p>No major risk signals detected.</p>
+                <p>
+                  No major risk signals detected.
+                </p>
               )}
             </div>
 
             <div className="risk-recommendation">
-              <div className="recommendation-icon">!</div>
+              <div className="recommendation-icon">
+                !
+              </div>
 
               <div>
-                <strong>Recommended Action</strong>
+                <strong>
+                  Recommended Action
+                </strong>
 
                 <p>
-                  Review the transaction details carefully. AI provides an
-                  alert and explanation; the final decision remains with you.
+                  Review the transaction details carefully.
+                  AI provides an alert and explanation; the final
+                  decision remains with you.
                 </p>
               </div>
             </div>
@@ -431,7 +716,9 @@ function RiskGuardian() {
             <div className="risk-modal-footer">
               <button
                 className="secondary-button"
-                onClick={() => setSelectedRisk(null)}
+                onClick={() =>
+                  setSelectedRisk(null)
+                }
               >
                 Close
               </button>
