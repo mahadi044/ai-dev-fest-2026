@@ -12,6 +12,8 @@ from app.routes.auth import router as auth_router
 from app.routes.prediction import router as prediction_router
 
 
+# ==================== APP ====================
+
 app = FastAPI(
     title="Money Guardian AI",
     description="Intelligent personal financial management and risk detection API",
@@ -24,14 +26,19 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        # Vite development ports
         "http://localhost:5173",
         "http://localhost:5174",
         "http://localhost:5175",
         "http://localhost:5176",
+        "http://localhost:5177",
+
+        # 127.0.0.1 development ports
         "http://127.0.0.1:5173",
         "http://127.0.0.1:5174",
         "http://127.0.0.1:5175",
         "http://127.0.0.1:5176",
+        "http://127.0.0.1:5177",
     ],
     allow_credentials=True,
     allow_methods=["*"],
